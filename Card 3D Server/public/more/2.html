@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="1000" height="1000"></canvas>
+    <div class="" id="bg"></div>
+    <script>
+        let c = document.getElementById("myCanvas");
+        let bg = document.getElementById('bg');
+        let ctx = c.getContext("2d");
+
+        let img = new Image(1000, 1000);
+        img.src = './2.jpg';
+        img.crossOrigin="Anonymous"
+        img.onload = () => {
+            console.log()
+            ctx.drawImage(img, 0, 0);
+            let dataUrl = c.toDataURL();
+            console.log(dataUrl)
+            bg.style.width = '1000px';
+            bg.style.height = '1000px';
+            bg.style.background = `url(${dataUrl}) no-repeat`
+        }
+        /*let imgData = ctx.createImageData(1000, 1000);
+        for (let i = 0; i < imgData.data.length; i += 4) {
+            imgData.data[i + 0] = 0;
+            imgData.data[i + 1] = 0;
+            imgData.data[i + 2] = 0;
+            imgData.data[i + 3] = Math.random() * (255 - 0) + 0;;
+        }
+        ctx.putImageData(imgData, 0, 0);*/
+
+        //bg.appendChild(img)
+    </script>
+</body>
+
+</html>
