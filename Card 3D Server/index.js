@@ -5,7 +5,11 @@ let express = require('express'),
     imgLib = require('./node_modules/imagelib/imageLib'),
     getHandler =require('./function/promises-wrappers').getHandler,
     getRequest = require('./function/promises-wrappers').getRequest,
-    
+    appConfigLoader = require('./function/config-loader');
+
+let config = appConfigLoader();
+
+console.log(config)
 app.use(express.static(`${__dirname}/public`));
 app.use(bodyParser.json());
 
@@ -56,4 +60,6 @@ getHandler('/get-matrix', app).then(({ req, res }) => {
     Promise.all(promises).then(value => console.log('value'))
 })
 
-app.listen(8000, () => console.log('Server is start on port 8000'));
+app.listen(config.appPort, () => console.log('Server is start on port 8000'));
+//https://maps.googleapis.com/maps/api/elevation/json?path=36.578581,-118.291994|36.23998,-116.83171&samples=3&key=YOUR_API_KEY
+//https://maps.googleapis.com/maps/api/elevation/json?path=36.578581,-118.291994|36.23998,-116.83171&samples=3&key=AIzaSyBKuJapDGNbls_9_vVbBC8GarwC8M2oBzk
