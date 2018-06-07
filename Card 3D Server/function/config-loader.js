@@ -2,7 +2,7 @@ const fs = require('fs');
 const CONFIG_FILE_NAME = require('../consts/app.const').CONFIG_FILE_NAME;
 const CONFIG_FOOLDER = require('../consts/app.const').CONFIG_FOOLDER;
 
-let readAppConfig = () => {
+export const readAppConfig = () => {
     try {
         let config = fs.readFileSync(`./${CONFIG_FOOLDER}/${CONFIG_FILE_NAME}`);
         return JSON.parse(config);
@@ -11,5 +11,3 @@ let readAppConfig = () => {
         process.exit(1);
     }
 }
-
-module.exports = readAppConfig;

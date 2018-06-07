@@ -1,17 +1,23 @@
-let express = require('express'),
-    bodyParser = require('body-parser'),
-    https = require('https'),
-    app = express();
+import express from 'express';
+import bodyParser from 'body-parser';
+import { readAppConfig } from './function/config-loader';
+import mongoose from 'mongoose'
+/*let https = require('https'),
     imgLib = require('./node_modules/imagelib/imageLib'),
     getHandler =require('./function/promises-wrappers').getHandler,
-    getRequest = require('./function/promises-wrappers').getRequest,
-    appConfigLoader = require('./function/config-loader');
+    getRequest = require('./function/promises-wrappers').getRequest,*/
+const conf = readAppConfig(),
+    app = express();
 
-let config = appConfigLoader();
-
-console.log(config)
-app.use(express.static(`${__dirname}/public`));
 app.use(bodyParser.json());
+app.use('/',)
+mongoose.connect(conf.dbServer, err => console.log('База данных подключена'));
+app.listen(conf.appPort, () => console.log(`Сервер запущен на порту ${conf.appPort}`));
+//https://maps.googleapis.com/maps/api/elevation/json?path=36.578581,-118.291994|36.23998,-116.83171&samples=3&key=YOUR_API_KEY
+//https://maps.googleapis.com/maps/api/elevation/json?path=36.578581,-118.291994|36.23998,-116.83171&samples=3&key=AIzaSyBKuJapDGNbls_9_vVbBC8GarwC8M2oBzk
+
+/*
+app.use(express.static(`${__dirname}/public`));
 
 getHandler('/get-image', app)
     .then(({ req, res }) => {
@@ -41,12 +47,6 @@ getHandler('/get-image', app)
         })
     })
 
-const a = [56.4737, 85.0288],
-    b = [56.4737, 85.0289],
-    c = [56.4738, 85.0289],
-    d = [56.4738, 85.0288];
-const key = 'AIzaSyBKuJapDGNbls_9_vVbBC8GarwC8M2oBzk';
-
 getHandler('/get-matrix', app).then(({ req, res }) => {
     let promises = [];
     let answers = [];
@@ -59,7 +59,4 @@ getHandler('/get-matrix', app).then(({ req, res }) => {
     }
     Promise.all(promises).then(value => console.log('value'))
 })
-
-app.listen(config.appPort, () => console.log('Server is start on port 8000'));
-//https://maps.googleapis.com/maps/api/elevation/json?path=36.578581,-118.291994|36.23998,-116.83171&samples=3&key=YOUR_API_KEY
-//https://maps.googleapis.com/maps/api/elevation/json?path=36.578581,-118.291994|36.23998,-116.83171&samples=3&key=AIzaSyBKuJapDGNbls_9_vVbBC8GarwC8M2oBzk
+*/
