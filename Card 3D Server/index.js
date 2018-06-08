@@ -1,24 +1,32 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { readAppConfig } from './function/config-loader';
-import mongoose from 'mongoose'
-/*let https = require('https'),
-    imgLib = require('./node_modules/imagelib/imageLib'),
-    getHandler =require('./function/promises-wrappers').getHandler,
-    getRequest = require('./function/promises-wrappers').getRequest,*/
+import mongoose from 'mongoose';
+import { Logger } from './classes';
+import imageLib from './node_modules/imagelib/imagelib';
+import { SUCCESS, ERR, LISTEN, CONECTING,
+    DB, SERVER,
+    PUBLIC_FOOLDER } from './consts';
+
 const conf = readAppConfig(),
+    logger = new Logger(),
     app = express();
 
 app.use(bodyParser.json());
-app.use('/',)
-mongoose.connect(conf.dbServer, err => console.log('База данных подключена'));
-app.listen(conf.appPort, () => console.log(`Сервер запущен на порту ${conf.appPort}`));
+app.use(express.static(`${__dirname}/${PUBLIC_FOOLDER}`));
+
+mongoose.connect(conf.dbServer, err =>
+    err ? logger.log(logger.types.ERR, `${DB}: ${CONECTING} - ${ERR}`, err) :
+    logger.log(logger.types.ERR, `${DB}: ${CONECTING} - ${SUCCESS}`)
+);
+app.listen(conf.appPort, err => 
+    err ? logger.log(logger.types.INFO, `${SERVER}: ${ERR}`, err) :
+    logger.log(logger.types.INFO, `${SERVER}: ${LISTEN} ${conf.appPort}`)
+);
 //https://maps.googleapis.com/maps/api/elevation/json?path=36.578581,-118.291994|36.23998,-116.83171&samples=3&key=YOUR_API_KEY
 //https://maps.googleapis.com/maps/api/elevation/json?path=36.578581,-118.291994|36.23998,-116.83171&samples=3&key=AIzaSyBKuJapDGNbls_9_vVbBC8GarwC8M2oBzk
 
 /*
-app.use(express.static(`${__dirname}/public`));
-
 getHandler('/get-image', app)
     .then(({ req, res }) => {
         res.setHeader('content-type', 'image');

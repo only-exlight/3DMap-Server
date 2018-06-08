@@ -1,0 +1,5 @@
+export const DB = 'БД'
+export const SERVER = 'Сервер'
+export const LOGGER = 'Логгер'
+export const API = 'API'
+export const COLLECTOR = 'Сборщик'

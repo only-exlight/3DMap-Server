@@ -1,0 +1,6 @@
+export const LISTEN = 'слушаю порт'
+export const CONECTING = 'подключение'
+export const ERR = 'ошибка'
+export const SUCCESS = 'успешно'
+export const OPEN_FILE = 'открытие файла'
+export const WRITE_FILE = 'запись в файл'
