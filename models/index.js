@@ -1,0 +1,1 @@
+export { HigthModel } from './higth.model';
