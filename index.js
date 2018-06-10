@@ -1,26 +1,30 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import { readAppConfig } from './function/config-loader';
 import mongoose from 'mongoose';
-import { Logger } from './classes';
+import { Logger, HigthCollector, ConfigLoader } from './classes';
 import { SUCCESS, ERR, LISTEN, CONECTING,
     DB, SERVER,
-    PUBLIC_FOOLDER } from './consts';
+    PUBLIC_FOOLDER, CONFIG_FOOLDER } from './consts';
 import { router } from './api';
 
-const conf = readAppConfig(),
-    logger = new Logger(),
-    app = express();
+const logger = new Logger(),
+    app = express(),
+    configLoader = new ConfigLoader(CONFIG_FOOLDER),
+    higthCollector = new HigthCollector();
 
 app.use(bodyParser.json());
 app.use(express.static(`${__dirname}/${PUBLIC_FOOLDER}`));
-app.use('/', router)
+app.use('/', router);
+configLoader.read()
+    .then(config => higthCollector.init(config.higthCollector))
+    .then(() => console.log(''))
+    .catch(err => console.log(err));
 
-mongoose.connect(conf.dbServer, err =>
+mongoose.connect(configLoader.configs.config.dbServer, err =>
     err ? logger.log(logger.types.ERR, `${DB}: ${CONECTING} - ${ERR}`, err) :
-    logger.log(logger.types.ERR, `${DB}: ${CONECTING} - ${SUCCESS}`)
+    logger.log(logger.types.INFO, `${DB}: ${CONECTING} - ${SUCCESS}`)
 );
-app.listen(conf.appPort, err => 
+app.listen(configLoader.configs.config.appPort, err => 
     err ? logger.log(logger.types.INFO, `${SERVER}: ${ERR}`, err) :
-    logger.log(logger.types.INFO, `${SERVER}: ${LISTEN} ${conf.appPort}`)
+    logger.log(logger.types.INFO, `${SERVER}: ${LISTEN} ${configLoader.configs.config.appPort}`)
 );
