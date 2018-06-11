@@ -17,7 +17,6 @@ app.use(express.static(`${__dirname}/${PUBLIC_FOOLDER}`));
 app.use('/', router);
 configLoader.read()
     .then(config => higthCollector.init(config.higthCollector))
-    .then(() => console.log(''))
     .catch(err => console.log(err));
 
 mongoose.connect(configLoader.configs.config.dbServer, err =>

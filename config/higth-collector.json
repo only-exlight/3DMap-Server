@@ -1,6 +1,6 @@
 {
     "apiKey": "AIzaSyBKuJapDGNbls_9_vVbBC8GarwC8M2oBzk",
-    "apiUrl": "https://maps.googleapis.com/maps/api/elevation/json?",
+    "apiUrl": "https://maps.googleapis.com/maps/api/elevation/",
     "space": {
         "width": 0,
         "heigth": 0
@@ -13,6 +13,7 @@
         "x": 56.5470,
         "y": 85.10260
     },
-    "step": 0.000001,
-    "maxQueryCount": 2500
+    "step": 0.00001,
+    "queryLimit": 2500,
+    "queryDelayMs": 500
 }

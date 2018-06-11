@@ -4,14 +4,24 @@ let Schema = mongoose.Schema;
 const Model = new Schema({
     higthCollector: {
         city: {
-            type: String
+            type: String,
+            unique: true
         },
         currentX: {
             type: Number,
         },
         currentY: {
             type: Number
-        }
+        },
+        queryWasDone: {
+            type: Number
+        },
+        queryHaveErr: [
+            {
+                url: String,
+                errMsg: String
+            }
+        ]
     }
 });
 
