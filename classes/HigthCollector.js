@@ -58,20 +58,19 @@ export class HigthCollector {
                 cb => CollectorsStatus.find({}, (err, res) => err ? cb(err) : cb(null, res)),
                 (res, cb) => {
                     if (res.length) {
-                        this._currentPoint.x = res[0].higthCollector.currentX;
-                        this._currentPoint.y = res[0].higthCollector.currentY;
-                        this._queryWasDone = res[0].higthCollector.queryWasDone;
+                        this._currentPoint.x = res[0].currentX;
+                        this._currentPoint.y = res[0].currentY;
+                        this._queryWasDone = res[0].queryWasDone;
                         cb(null);
                     } else {
                         let status = new CollectorsStatus({
-                            higthCollector: {
+                                collectorType: 'higth-collector',
                                 city: this.city,
                                 currentX: this._startPoint.x,
                                 currentY: this._startPoint.y,
                                 queryWasDone: 0,
                                 queryHaveErr: []
-                            }
-                        });
+                            });
                         status.save(err => {
                             if (err) {
                                 cb(err);
@@ -87,8 +86,7 @@ export class HigthCollector {
 
     startCollect() {
         this._timer = setInterval(() => {
-            if (this._queryWasDone > this._queryLimit) {
-                this._queryWasDone = 0;
+            if (this._queryWasDone >= this._queryLimit) {
                 this.stopCollect();
                 this.planNext();
             } else {
@@ -98,16 +96,18 @@ export class HigthCollector {
                             res.data.status === 'OK' ? cb(null, res.data.results, null) : cb(null, null, res.data.error_message))
                             .catch(err => cb(err)),
                     (data, msg, cb) => {
+                        this._queryWasDone++;
                         if (msg) {
                             const findDoc = { city: this.city },
                                 updDoc = {
                                     $set: {
+                                        queryWasDone: this._queryWasDone,
                                         queryHaveErr: [{
                                             url: url,
                                             errMsg: answ.error_message }]
                                     }
                                 };
-                            CollectorsStatus.findOneAndUpdate(findDoc, updDoc, err => err ? cb(err) : cb(null));
+                            CollectorsStatus.findOneAndUpdate(findDoc, updDoc, err => err ? cb(err) : cb(msg));
                         } else {
                             console.time()
                             let elv = data.map(point => new HigthModel({
@@ -117,9 +117,14 @@ export class HigthCollector {
                                 resolution: point.resolution
                             }));
                             console.timeEnd();
-                            HigthModel.insertMany(elv, err => err ? cb(err) : cb(null));
+                            HigthModel.insertMany(elv, err => err ? cb(err) : cb(null, this._currentPoint.x, this._currentPoint.y));
                         }
-                    }
+                    },
+                    (x, y, cb) => CollectorsStatus.update({ city: this.city }, { $set: {
+                        queryWasDone: this._queryWasDone,
+                        currentX: x,
+                        currentY: y
+                    }}, err => err ? cb(err) : cb(null))
                 ], err => err ? console.log(err) : null);
             }
         }, this._queryDelayMs);
@@ -130,7 +135,9 @@ export class HigthCollector {
     };
 
     planNext() {
-        this._planTimer = setTimeout(() => this.startCollect(), 24*60*60*1000);
+        this._queryWasDone = 0;
+        this._planTimer = setTimeout(() => 
+            this.startCollect(), 24*60*60*1000 - this._queryLimit * this._queryDelayMs);
     };
     
     cancelPlan() {

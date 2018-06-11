@@ -14,7 +14,7 @@ const Model = new Schema({
         type: Number,
         required: true
     },
-     resolution: {
+    resolution: {
          type: Number,
          required: true
      }

@@ -14,6 +14,6 @@
         "y": 85.10260
     },
     "step": 0.00001,
-    "queryLimit": 2,
-    "queryDelayMs": 30000
+    "queryLimit": 10,
+    "queryDelayMs": 5000
 }
