@@ -23,7 +23,12 @@ const Model = new Schema({
     queryHaveErr: [{
         url: String,
         errMsg: String
-    }]
+    }],
+    lastStart: {
+        type: Date,
+        required: true,
+        default: new Date()
+    }
 });
 
 export const CollectorsStatus = mongoose.model('collectors-status', Model);

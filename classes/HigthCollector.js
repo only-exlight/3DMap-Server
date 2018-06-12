@@ -77,8 +77,8 @@ export class HigthCollector {
                     },
                     (x, y, cb) => CollectorsStatus.update({ city: this.city }, { $set: {
                         queryWasDone: this._queryWasDone,
-                        currentX: x,
-                        currentY: y
+                        currentX: x.toFixed(5),
+                        currentY: y.toFixed(5)
                     }}, err => err ? cb(err) : cb(null))
                 ], err => err ? console.log(err) : null);
             }
@@ -114,13 +114,18 @@ export class HigthCollector {
 
     _checkStatus() {
         return new Promise((resolve, reject) => {
+            const find = { collectorType: 'higth-collector' };
             async.waterfall([
-                cb => CollectorsStatus.find({}, (err, res) => err ? cb(err) : cb(null, res)),
-                (res, cb) => {
-                    if (res.length) {
-                        this._currentPoint.x = res[0].currentX;
-                        this._currentPoint.y = res[0].currentY;
-                        this._queryWasDone = res[0].queryWasDone;
+                cb => CollectorsStatus.findOne(find, (err, doc) => err ? cb(err) : cb(null, doc)),
+                (doc, cb) => {
+                    if (doc) {
+                        this._currentPoint.x = doc.currentX;
+                        this._currentPoint.y = doc.currentY;
+                        if (new Date(doc.lastStart).getDate() === new Date().getDate()){
+                            this._queryWasDone = doc.queryWasDone;
+                        } else {
+                            this._queryWasDone = 0;
+                        }
                         cb(null);
                     } else {
                         let status = new CollectorsStatus({
@@ -129,7 +134,7 @@ export class HigthCollector {
                                 currentX: this._startPoint.x,
                                 currentY: this._startPoint.y,
                                 queryWasDone: 0,
-                                queryHaveErr: []
+                                queryHaveErr: [],
                             });
                         status.save(err => {
                             if (err) {
