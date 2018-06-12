@@ -39,51 +39,6 @@ export class HigthCollector {
             .catch(err => console.log(err));
     };
 
-    _createQuery() {
-        let endPoint = `${this._currentPoint.x.toFixed(5)},${(this._currentPoint.y + this._step * this._pointInQuery).toFixed(5)}`
-        let path = `path=${this._currentPoint.x.toFixed(5)},${this._currentPoint.y.toFixed(5)}|${endPoint}`;
-        let queryUrl = `${this._apiURL}json?${path}&samples=${this._pointInQuery}&key=${this._apiKey}`;
-        if (this._currentPoint.x === this._endPoint.x) {
-            this._currentPoint.x = this._startPoint.x;
-            this._currentPoint.y += this._step * this._pointInQuery;
-        } else {
-            this._currentPoint.x += this._step;
-        }
-        return queryUrl;
-    };
-
-    _checkStatus() {
-        return new Promise((resolve, reject) => {
-            async.waterfall([
-                cb => CollectorsStatus.find({}, (err, res) => err ? cb(err) : cb(null, res)),
-                (res, cb) => {
-                    if (res.length) {
-                        this._currentPoint.x = res[0].currentX;
-                        this._currentPoint.y = res[0].currentY;
-                        this._queryWasDone = res[0].queryWasDone;
-                        cb(null);
-                    } else {
-                        let status = new CollectorsStatus({
-                                collectorType: 'higth-collector',
-                                city: this.city,
-                                currentX: this._startPoint.x,
-                                currentY: this._startPoint.y,
-                                queryWasDone: 0,
-                                queryHaveErr: []
-                            });
-                        status.save(err => {
-                            if (err) {
-                                cb(err);
-                            } else {
-                                this._currentPoint = this._startPoint;
-                                cb(null);
-                            }
-                        });
-                    }
-                }], err =>  err ? reject(err) : resolve());
-        });
-    };
-
     startCollect() {
         this._timer = setInterval(() => {
             if (this._queryWasDone >= this._queryLimit) {
@@ -142,6 +97,51 @@ export class HigthCollector {
     
     cancelPlan() {
         clearTimeout(this._planTimer);
+    };
+
+    _createQuery() {
+        let endPoint = `${this._currentPoint.x.toFixed(5)},${(this._currentPoint.y + this._step * this._pointInQuery).toFixed(5)}`
+        let path = `path=${this._currentPoint.x.toFixed(5)},${this._currentPoint.y.toFixed(5)}|${endPoint}`;
+        let queryUrl = `${this._apiURL}json?${path}&samples=${this._pointInQuery}&key=${this._apiKey}`;
+        if (this._currentPoint.x === this._endPoint.x) {
+            this._currentPoint.x = this._startPoint.x;
+            this._currentPoint.y += this._step * this._pointInQuery;
+        } else {
+            this._currentPoint.x += this._step;
+        }
+        return queryUrl;
+    };
+
+    _checkStatus() {
+        return new Promise((resolve, reject) => {
+            async.waterfall([
+                cb => CollectorsStatus.find({}, (err, res) => err ? cb(err) : cb(null, res)),
+                (res, cb) => {
+                    if (res.length) {
+                        this._currentPoint.x = res[0].currentX;
+                        this._currentPoint.y = res[0].currentY;
+                        this._queryWasDone = res[0].queryWasDone;
+                        cb(null);
+                    } else {
+                        let status = new CollectorsStatus({
+                                collectorType: 'higth-collector',
+                                city: this.city,
+                                currentX: this._startPoint.x,
+                                currentY: this._startPoint.y,
+                                queryWasDone: 0,
+                                queryHaveErr: []
+                            });
+                        status.save(err => {
+                            if (err) {
+                                cb(err);
+                            } else {
+                                this._currentPoint = this._startPoint;
+                                cb(null);
+                            }
+                        });
+                    }
+                }], err =>  err ? reject(err) : resolve());
+        });
     };
 }
 //https://maps.googleapis.com/maps/api/elevation/json?

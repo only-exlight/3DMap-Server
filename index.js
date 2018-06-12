@@ -5,7 +5,7 @@ import { Logger, HigthCollector, ConfigLoader } from './classes';
 import { SUCCESS, ERR, LISTEN, CONECTING,
     DB, SERVER,
     PUBLIC_FOOLDER, CONFIG_FOOLDER } from './consts';
-import { router } from './api';
+import { ClientApi, CollectorsApi } from './api';
 
 const logger = new Logger(),
     app = express(),
@@ -14,7 +14,8 @@ const logger = new Logger(),
 
 app.use(bodyParser.json());
 app.use(express.static(`${__dirname}/${PUBLIC_FOOLDER}`));
-app.use('/', router);
+app.use('/api/collectors', CollectorsApi);
+app.use('/api/client', ClientApi);
 configLoader.read()
     .then(config => higthCollector.init(config.higthCollector))
     .catch(err => console.log(err));
