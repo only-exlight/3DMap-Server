@@ -1,7 +1,6 @@
 {
   "name": "arrtoimg",
   "dependencies": {
-    "array-to-image": "^1.0.0",
     "async": "^2.6.1",
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
@@ -9,6 +8,7 @@
     "express": "^4.16.3",
     "imagelib": "0.0.1",
     "mongoose": "^5.1.4",
+    "mongoose-geojson-schema": "^2.1.2",
     "to-camel-case": "^1.0.0"
   },
   "version": "1.0.0",

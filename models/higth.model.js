@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import GeoJSON from 'mongoose-geojson-schema';
 let Schema = mongoose.Schema;
 
 const Model = new Schema({
