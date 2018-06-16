@@ -15,24 +15,5 @@ var Model = new Schema({
         required: true
     }
 });
- 
-/*const Model = new Schema({
-    elevation: {
-        type: Number,
-        required: true,
-    },
-    lat: {
-        type: Number,
-        required: true
-    },
-    lng: {
-        type: Number,
-        required: true
-    },
-    resolution: {
-         type: Number,
-         required: true
-     }
-});*/
 
 export const HigthModel = model('elevation', Model);

@@ -73,8 +73,10 @@ export class HigthCollector {
                             console.time()
                             let elv = data.map((point: GoogleElevation) => new HigthModel({
                                 elevation: point.elevation,
-                                lat: point.location.lat.toFixed(5),
-                                lng: point.location.lng.toFixed(5),
+                                point: {
+                                    type: "Point",
+                                    coordinates: [point.location.lat, point.location.lng]
+                                },
                                 resolution: point.resolution
                             }));
                             console.timeEnd();
