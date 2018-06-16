@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "sourceMap": true,
+        "outDir": "build/src",
+        "rootDir": "src"
+    },
+    //указывает что включаться должны только файлы из папки /src
+    "include": [
+      "src/**/*"
+    ]
+}

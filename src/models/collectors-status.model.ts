@@ -1,5 +1,4 @@
-import mongoose from 'mongoose';
-let Schema = mongoose.Schema;
+import { Schema, model } from 'mongoose';
 
 const Model = new Schema({
     collectorType: {
@@ -31,4 +30,4 @@ const Model = new Schema({
     }
 });
 
-export const CollectorsStatus = mongoose.model('collectors-status', Model);
+export const CollectorsStatus = model('collectors-status', Model);

@@ -1,22 +1,27 @@
-import {
-    HigthModel,
-    CollectorsStatus
-} from '../models';
+import { HigthModel, CollectorsStatus } from '../models';
+import { HigthCollectorConfig } from '../interfaces';
 import axios from 'axios';
-import async from 'async';
+import { waterfall } from 'async';
 
 export class HigthCollector {
-    constructor() {
-        this._pointInQuery = 512;
-        this._queryWasDone = 0;
-        this._queryHaveErr = 0;
-        this.city = 'Tomsk';
-        this._timer = null;
-        this._planTimer = null;
-    }
+    public city = 'Tomsk';
+    private _pointInQuery = 512;
+    private _queryWasDone = 0;
+    private _timer: NodeJS.Timer = null;
+    private _planTimer: NodeJS.Timer = null;
+    private _apikey: string;
+    private _apiURL: string;
+    private _step: number;
+    private _queryLimit: number;
+    private _queryDelayMs: number;
+    private _startPoint: any; // ??
+    private _endPoint: any; // ??
+    private _currentPoint: any; // ??
 
-    init(config) {
-        this._apiKey = config.apiKey;
+    constructor() { }
+
+    init(config: HigthCollectorConfig) {
+        this._apikey = config.apiKey;
         this._apiURL = config.apiUrl;
         this._startPoint = {
             x: config.startPoint.x,
@@ -39,14 +44,14 @@ export class HigthCollector {
             .catch(err => console.log(err));
     };
 
-    startCollect() {
+    public startCollect() {
         this._timer = setInterval(() => {
             if (this._queryWasDone >= this._queryLimit) {
                 this.stopCollect();
                 this.planNext();
             } else {
                 let url = this._createQuery();
-                async.waterfall([
+                waterfall([
                     cb => axios.get(url).then(res => 
                             res.data.status === 'OK' ? cb(null, res.data.results, null) : cb(null, null, res.data.error_message))
                             .catch(err => cb(err)),
@@ -59,7 +64,7 @@ export class HigthCollector {
                                         queryWasDone: this._queryWasDone,
                                         queryHaveErr: [{
                                             url: url,
-                                            errMsg: answ.error_message }]
+                                            errMsg: msg }]
                                     }
                                 };
                             CollectorsStatus.findOneAndUpdate(findDoc, updDoc, err => err ? cb(err) : cb(msg));
@@ -85,24 +90,24 @@ export class HigthCollector {
         }, this._queryDelayMs);
     };
 
-    stopCollect() {
+    public stopCollect() {
         clearInterval(this._timer);
     };
 
-    planNext() {
+    public planNext() {
         this._queryWasDone = 0;
         this._planTimer = setTimeout(() => 
             this.startCollect(), 24*60*60*1000 - this._queryLimit * this._queryDelayMs);
     };
     
-    cancelPlan() {
+    public cancelPlan() {
         clearTimeout(this._planTimer);
     };
 
-    _createQuery() {
+    private _createQuery() {
         let endPoint = `${this._currentPoint.x.toFixed(5)},${(this._currentPoint.y + this._step * this._pointInQuery).toFixed(5)}`
         let path = `path=${this._currentPoint.x.toFixed(5)},${this._currentPoint.y.toFixed(5)}|${endPoint}`;
-        let queryUrl = `${this._apiURL}json?${path}&samples=${this._pointInQuery}&key=${this._apiKey}`;
+        let queryUrl = `${this._apiURL}json?${path}&samples=${this._pointInQuery}&key=${this._apikey}`;
         if (this._currentPoint.x === this._endPoint.x) {
             this._currentPoint.x = this._startPoint.x;
             this._currentPoint.y += this._step * this._pointInQuery;
@@ -112,10 +117,10 @@ export class HigthCollector {
         return queryUrl;
     };
 
-    _checkStatus() {
+    private _checkStatus() {
         return new Promise((resolve, reject) => {
             const find = { collectorType: 'higth-collector' };
-            async.waterfall([
+            waterfall([
                 cb => CollectorsStatus.findOne(find, (err, doc) => err ? cb(err) : cb(null, doc)),
                 (doc, cb) => {
                     if (doc) {

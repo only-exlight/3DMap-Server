@@ -1,7 +1,5 @@
 import express from 'express';
-import path from 'path';
 import { CollectorsStatus } from '../models';
-import async from 'async';
 
 export const CollectorsApi = express.Router();
 

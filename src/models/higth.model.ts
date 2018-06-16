@@ -1,6 +1,5 @@
-import mongoose from 'mongoose';
+import { Schema, model, SchemaType,  } from 'mongoose';
 import GeoJSON from 'mongoose-geojson-schema';
-let Schema = mongoose.Schema;
 
 const Model = new Schema({
     elevation: {
@@ -21,4 +20,4 @@ const Model = new Schema({
      }
 });
 
-export const HigthModel = mongoose.model('higthts', Model);
+export const HigthModel = model('higthts', Model);

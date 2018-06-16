@@ -1,5 +1,5 @@
 import express from 'express';
-import imageLib from '../node_modules/imagelib/imageLib';
+import imageLib from '../../node_modules/imagelib/imageLib';
 import { HigthModel } from '../models';
 import waterfall from 'async/waterfall';
 
