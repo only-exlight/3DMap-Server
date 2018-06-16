@@ -1,5 +1,5 @@
 import { Schema, model, SchemaType,  } from 'mongoose';
-import GeoJSON from 'mongoose-geojson-schema';
+import * as GeoJSON from 'mongoose-geojson-schema';
 
 const Model = new Schema({
     elevation: {

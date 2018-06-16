@@ -1,25 +1,27 @@
-import { setTheme, yellow, cyan, red, magenta,  } from 'colors'
-import { createWriteStream }  from 'fs'
+import chalk from 'chalk';
+import { createWriteStream }  from 'fs';
 import { LOGS_FILE, LOGS_FOOLDER, 
-    ERR, LOGGER, OPEN_FILE, WRITE_FILE, SUCCESS,
-    LOGS_TYPES } from '../consts'
+    ERR, LOGGER, OPEN_FILE, WRITE_FILE, SUCCESS } from '../consts';
+import { LOGS_TYPES } from '../enums';
 
 export class Logger {
     private _logFoolder = LOGS_FOOLDER;
     private _stream = createWriteStream(`./${LOGS_FOOLDER}/${LOGS_FILE}`);
-    public 
-    constructor() {
-        setTheme({
-            info: cyan,
-            warn: yellow,
-            err: red,
-            time: magenta
-        })
-    }
+    constructor() { }
 
-    public log(type, msg, err) {
+    public log(type, msg, err?) {
+        
+        let curType: string = null;
+        switch (type) {
+            case LOGS_TYPES.ERR: curType = 'red';
+                break;
+            case LOGS_TYPES.WARN: curType = 'yellow';
+                break;
+            case LOGS_TYPES.INFO: curType = 'blue';
+                break;
+        }
         const logMsg = `${new Date()} ${msg}\n`;
-        console.log(`${time(new Date())} ${colors[type](msg)}`);
+        console.log(`${chalk.magenta(new Date().toString())} ${chalk[curType](msg)}`);
         this._stream.write(logMsg, err => this._writeFileCb(err));
         if (err) {
             console.log(err)
@@ -28,19 +30,19 @@ export class Logger {
 
     private _openFileCb(err: any) {
         if (err) {
-            console.log(`${colors.time(new Date())} ${colors.err(`${LOGGER}: ${OPEN_FILE} - ${ERR}`)}`);
+            console.log(`${chalk.magenta(new Date().toString())} ${chalk.red(`${LOGGER}: ${OPEN_FILE} - ${ERR}`)}`);
             console.log(err);
         } else {
-            console.log(`${colors.time(new Date())} ${colors.info(`${LOGGER}: ${OPEN_FILE} - ${SUCCESS}`)}`);
+            console.log(`${chalk.magenta(new Date().toString())} ${chalk.blue(`${LOGGER}: ${OPEN_FILE} - ${SUCCESS}`)}`);
         }
 
     }
     private _writeFileCb(err: any) {
         if (err) {
-            console.log(`${colors.time(new Date())} ${colors.err(`${LOGGER}: ${WRITE_FILE} - ${ERR}`)}`);
+            console.log(`${chalk.magenta(new Date().toString())} ${chalk.red(`${LOGGER}: ${WRITE_FILE} - ${ERR}`)}`);
             console.log(err);
         } else {
-            console.log(`${colors.time(new Date())} ${colors.info(`${LOGGER}: ${WRITE_FILE} - ${SUCCESS}`)}`)
+            console.log(`${chalk.magenta(new Date().toString())} ${chalk.blue(`${LOGGER}: ${WRITE_FILE} - ${SUCCESS}`)}`)
         }
     }
 }

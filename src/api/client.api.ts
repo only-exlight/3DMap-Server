@@ -1,9 +1,9 @@
-import express from 'express';
+import { Router } from 'express';
 import imageLib from '../../node_modules/imagelib/imageLib';
 import { HigthModel } from '../models';
 import waterfall from 'async/waterfall';
 
-export const ClientApi = express.Router();
+export const ClientApi = Router();
 
 ClientApi.get('/get-higthmap', (req, res) => {
     if (req.query.startx && req.query.starty && req.query.endx && req.query.endy) {

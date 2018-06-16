@@ -1,7 +1,7 @@
-import express from 'express';
+import { Router } from 'express';
 import { CollectorsStatus } from '../models';
 
-export const CollectorsApi = express.Router();
+export const CollectorsApi = Router();
 
 CollectorsApi.get('/*', (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');

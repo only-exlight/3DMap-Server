@@ -1,27 +1,30 @@
 import { readdirSync, readFileSync } from 'fs';
 import { basename } from 'path';
-import { toCamelCase } from 'to-camel-case';
+import * as toCamelCase from 'to-camel-case';
 
 export class ConfigLoader {
-    private _foolder: string;
     public configs: any; // ??
+    private _foolder: string;
+    
     constructor(configFoolder:string) {
         this._foolder = configFoolder;
         this.configs = { };
     }
 
-    read() {
+    public read() {
         return new Promise((resolve, reject) => {
             try {
-                let configFiles = readdirSync(`./${this._foolder}`);
-                configFiles.forEach(file => 
-                    this.configs[toCamelCase(basename(file, 'json'))] = 
-                    JSON.parse(readFileSync(`./${this._foolder}/${file}`).toString()));
-                    resolve(this.configs);
+                const configFiles: string [] = readdirSync(`./${this._foolder}`);
+                configFiles.forEach((fileName: string) => {
+                    let confName: string = basename(fileName, '.json');
+                    confName = toCamelCase(confName);
+                    const file: string = readFileSync(`./${this._foolder}/${fileName}`).toString();
+                    this.configs[confName] = JSON.parse(file);
+                }); 
+                resolve(this.configs);
             } catch (err) {
                 reject(err);
             }
-        })
-        
+        });
     }
 }
