@@ -1,6 +1,6 @@
 import { HigthModel, CollectorsStatus } from '../models';
-import { HigthCollectorConfig } from '../interfaces';
-import axios from 'axios';
+import { HigthCollectorConfig, GoogleElevationResponse, GoogleElevation } from '../interfaces';
+import axios, { AxiosResponse } from 'axios';
 import { waterfall } from 'async';
 
 export class HigthCollector {
@@ -52,10 +52,11 @@ export class HigthCollector {
             } else {
                 let url = this._createQuery();
                 waterfall([
-                    cb => axios.get(url).then(res => 
+                    (cb: Function) => 
+                        axios.get(url).then((res: AxiosResponse<GoogleElevationResponse>) => 
                             res.data.status === 'OK' ? cb(null, res.data.results, null) : cb(null, null, res.data.error_message))
                             .catch(err => cb(err)),
-                    (data, msg, cb) => {
+                    (data: GoogleElevation[], msg: string, cb: Function) => {
                         this._queryWasDone++;
                         if (msg) {
                             const findDoc = { city: this.city },
@@ -70,7 +71,7 @@ export class HigthCollector {
                             CollectorsStatus.findOneAndUpdate(findDoc, updDoc, err => err ? cb(err) : cb(msg));
                         } else {
                             console.time()
-                            let elv = data.map(point => new HigthModel({
+                            let elv = data.map((point: GoogleElevation) => new HigthModel({
                                 elevation: point.elevation,
                                 lat: point.location.lat.toFixed(5),
                                 lng: point.location.lng.toFixed(5),
@@ -80,7 +81,7 @@ export class HigthCollector {
                             HigthModel.insertMany(elv, err => err ? cb(err) : cb(null, this._currentPoint.x, this._currentPoint.y));
                         }
                     },
-                    (x, y, cb) => CollectorsStatus.update({ city: this.city }, { $set: {
+                    (x: number, y: number, cb: Function) => CollectorsStatus.update({ city: this.city }, { $set: {
                         queryWasDone: this._queryWasDone,
                         currentX: x.toFixed(5),
                         currentY: y.toFixed(5)
@@ -121,8 +122,9 @@ export class HigthCollector {
         return new Promise((resolve, reject) => {
             const find = { collectorType: 'higth-collector' };
             waterfall([
-                cb => CollectorsStatus.findOne(find, (err, doc) => err ? cb(err) : cb(null, doc)),
-                (doc, cb) => {
+                cb => 
+                    CollectorsStatus.findOne(find, (err, doc: Document) => err ? cb(err) : cb(null, doc)),
+                (doc: any, cb: Function) => {
                     if (doc) {
                         this._currentPoint.x = doc.currentX;
                         this._currentPoint.y = doc.currentY;
