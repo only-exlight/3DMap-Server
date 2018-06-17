@@ -70,7 +70,6 @@ export class HigthCollector {
                                 };
                             CollectorsStatus.findOneAndUpdate(findDoc, updDoc, err => err ? cb(err) : cb(msg));
                         } else {
-                            console.time()
                             let elv = data.map((point: GoogleElevation) => new HigthModel({
                                 elevation: point.elevation,
                                 point: {
@@ -79,7 +78,6 @@ export class HigthCollector {
                                 },
                                 resolution: point.resolution
                             }));
-                            console.timeEnd();
                             HigthModel.insertMany(elv, err => err ? cb(err) : cb(null, this._currentPoint.x, this._currentPoint.y));
                         }
                     },

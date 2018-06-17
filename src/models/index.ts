@@ -1,2 +1,2 @@
-export { HigthModel } from './higth.model';
-export { CollectorsStatus } from './collectors-status.model';
+export * from './higth.model';
+export * from './collectors-status.model';

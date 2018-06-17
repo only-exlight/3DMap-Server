@@ -1,46 +1,52 @@
 import { Router } from 'express';
-import imageLib from '../../node_modules/imagelib/imageLib';
-import { HigthModel } from '../models';
-import waterfall from 'async/waterfall';
+import { HigthModel, HigthModelDocument } from '../models';
+import { waterfall } from 'async';
+import { ImgHelper } from '../classes';
+let imageLib = require('../../node_modules/imagelib/imageLib.js');
 
 export const ClientApi = Router();
 
 ClientApi.get('/get-higthmap', (req, res) => {
     if (req.query.startx && req.query.starty && req.query.endx && req.query.endy) {
-        const findX = {
-            lat: { $gte: req.query.startx, $lte: req.query.endx },
-        };
-        const findY = {
-            lng: { $gte: req.query.starty, $lte: req.query.endy}
-        }
-        const xField = { lat : 1,  elevation: 1 }, yField = { lng: 1, elevation: 1 };
-        const xFieldSrt = { lat : 1 }, yFieldSrt = { lng: 1 };
-        let xEle = [], yEle = [];
         waterfall([
-            cb => HigthModel.find(findX, xField, (err, x) => err ? cb(err) : cb(null, x)).sort(xFieldSrt),
-            (x, cb) => HigthModel.find(findY, yField, (err, y) => err ? cb(err) : cb(null, x, y)).sort(yFieldSrt),
-            (x, y, cb) => {
-                res.setHeader('Content-Type', 'application/json'/*'image/jpeg'*/);
+            (cb: Function) => {
+                HigthModel.find({
+                    point: {
+                        $geoWithin: {
+                            $box: [
+                                [req.query.startx, req.query.starty],
+                                [req.query.endx, req.query.endy]
+                            ]
+                        }
+                    }
+                }, (err: any, docs: HigthModelDocument) => err ? cb(err) : cb(null, docs))
+            },
+            (docs: HigthModelDocument [], cb: Function) => {
                 console.time();
-                let objX = {}, objY = {};
-                x.forEach(x => {
-                    let str = x.lat;
-                    objX[str] = true;
+                const imgWidth: number = ImgHelper.getImgWidth(req.query.startx, req.query.endx);
+                const imgHeight: number = ImgHelper.getImgHeigth(req.query.starty, req.query.endy);
+                const elev: number [] = docs.map((doc: HigthModelDocument) => doc.elevation);
+                const maxElev: number = Math.max(...elev);
+                const minElev: number = Math.min(...elev);
+                console.log(imgWidth, imgHeight);
+                console.timeEnd()
+                imageLib(imgWidth, imgHeight).create(function() {
+                    console.time()
+                    docs.forEach((doc:HigthModelDocument) => {
+                        const color: number = ImgHelper.elevationToColor(minElev, maxElev, doc.elevation);
+                        const x: number = ImgHelper.xPositionPixel(req.query.startx, doc.point.coordinates["0"]);
+                        const y: number = ImgHelper.yPositionPixel(req.query.starty, doc.point.coordinates["1"]);
+                        this.setPixel(x, y, color, color, color);
+                    });
+                    const fd = this.jpeg_encode.encode(this, 85);
+                    const bf: Buffer = new Buffer(fd);
+                    console.timeEnd()
+                    cb(null, bf);
                 });
-                y.forEach(y => {
-                    let str = y.lng;
-                    objY[str] = true;
-                });
-                let answ = JSON.stringify({
-                    x: Object.keys(objX),
-                    y: Object.keys(objY)
-                });
-                console.timeEnd();
-                res.send(answ);
-                cb(null)
             }
-        ], (err, img) => {
+        ], (err, img: Buffer) => {
             if (err) {
+                res.setHeader('Access-Control-Allow-Origin', '*');
                 res.setHeader('Content-Type', 'application/json');
                 res.status(500);
                 res.end(JSON.stringify({
@@ -48,6 +54,9 @@ ClientApi.get('/get-higthmap', (req, res) => {
                     msg: 'Data base error'
                 }))
             } else {
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Content-Type', 'image/jpeg');
+                res.send(img);
                 res.end();
             }
         });
